@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Data Visualization</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+        <script>
+            const mScale = d3.scaleLinear()
+              .domain([0,10])
+              .range([-1000,1000]);
+
+            //输入domain里的值，返回range的值
+            let value = 8
+            let result = mScale(value)
+        </script>
+    </body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Data Visualization</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+       
+        <svg width = "960" height = "960" id = "mainSvg" class = "svgs"></svg>
+        <script>
+            let mainSvg = d3.select('.svgs');
+
+            let dates;
+
+            let xValue = d => Math.log(d["新增确诊"]+1);
+            let yValue = d => Math.log(d["确诊人数"]+1);
+            
+            d3.csv('./Resources/Data/hubeinxt.csv').then( data =>{
+
+                data = data.filter(d => d["地区"]!="总计");
+
+                data.forEach(element => {
+                    element["确诊人数"] = +(element["确诊人数"]);
+                    element["新增确诊"] = +(element["新增确诊"]);
+                    if(element["新增确诊"]<0)
+                        element["新增确诊"]=0;
+                });
+
+                
+                //Set中元素不重复，用以获得日期列表
+                var map = data.map(d => d["日期"]);
+                var set = new Set(map);
+                dates = Array.from(set);
+
+                //日期排序
+                dates.sort((a,b) => {
+                    return new Date(a)- new Date(b);
+                });
+
+                //按日期把数据归类
+                //给日期安排数组空间
+                var seqList = [];                              //应当是二维数组
+                dates.forEach(date =>{
+                    seqList.push([]);
+                });
+
+                //把各个日期数据放入空间
+                data.forEach(d =>{
+                    seqList[dates.indexOf(d["日期"])].push(d);
+                });
+
+                
+
+                console.log(seqList);
+
+
+
+
+                //建立图表，改变尺寸等
+                const mainSvg = d3.select("#mainSvg");
+                const mainWidth = +mainSvg.attr("width");
+                const mainHeight = +mainSvg.attr("height");
+
+                const margin = {top:60, right:120, bottom:30, left:120};
+                const innerWidth = mainWidth - margin.left - margin.right;
+                const innerHeight = mainHeight - margin.bottom - margin.top;
+
+                const g = mainSvg.append("g")
+                    .attr("id", "mainGroup")
+                    .attr("width", innerWidth)
+                    .attr("height", innerHeight)
+                    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+                //定义比例尺
+                const xScale = d3.scaleLinear()
+                    //.domain(d3.extent(data, d => d["新增确诊"]))              //将取值方法封装
+                    .domain(d3.extent(data, xValue))
+                    .range([0, innerWidth])
+                    .nice();
+
+                const yScale = d3.scaleLinear()
+                    //.domain([0, d3.max(data, d => d["确诊人数"])])
+                    .domain(d3.extent(data, yValue).reverse())
+                    .range([0, innerHeight])
+                    .nice();
+
+                //添加坐标轴
+                const xAxis = d3.axisBottom(xScale)
+                g.append("g").call(xAxis)
+                    .attr("transform", `translate(0, ${innerHeight})`);
+
+                const yAxis = d3.axisLeft(yScale);
+                g.append("g").call(yAxis);
+
+
+            });
+            
+        </script>
+    </body>
+</html>

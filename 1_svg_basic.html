@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Data Visualization</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+        
+        <h1 style = 'text-align: center; color: gray;'>Draw a circle!</h1>
+        
+        <svg width = "960" height = "500" id = "mainSvg" class = "svgs"></svg>
+        <script>
+            let mainSvg = d3.select('.svgs')
+
+            let mainGroup = mainSvg
+            .append('g')
+            .attr('transform', `translate(${100}, ${100})`)
+
+            let circle = mainGroup
+            .append('circle')
+            .attr('stroke', 'black')
+            .attr('r', '66')
+            .attr('fill', 'yellow')
+
+        </script>
+    </body>
+</html>

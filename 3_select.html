@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Data Visualization</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+
+
+        <svg width = "1600" height = "900" id = "mainSvg" class = "svgs"></svg>
+        <script>
+            let mainSvg = d3.select('.svgs')
+
+            let firstGroup = mainSvg
+            .append('g')
+            .attr('transform', `translate(500,100)`)
+            let circle1 = firstGroup
+            .append('circle')
+            .attr('id', 'circle1')
+            .attr('stroke', 'black')
+            .attr('r', '70')
+            .attr('fill', 'white')
+
+
+            let secondGroup = mainSvg
+            .append('g')
+            .attr('x', '500')
+            .attr('y', '100')
+
+            let rect1 = secondGroup
+            .append('rect')
+            .attr('id', 'testRect')
+            .attr('stroke', 'black')
+            .attr('width', '200')
+            .attr('height', '160')
+            .attr('fill', 'white')
+            
+            
+            let circle2 = firstGroup
+            .append('circle')
+            .attr('class', 'circle2')
+            .attr('stroke', 'black')
+            .attr('r', '70')
+            .attr('fill', 'white')
+            .attr('transform', `translate(500,0)`)
+            
+
+            //按id索引
+            d3.select("#circle1").attr('fill', 'yellow')
+
+            //按类名索引
+            d3.selectAll(".circle2").attr('fill', 'red')
+
+            //按标签索引
+            d3.selectAll("rect").attr('y', 150)
+
+            //TODO: 层级索引
+            //d3.selectAll("circle.child").attr('cy', 150)
+            //d3.selectAll("#testRect child").attr('translate', `scale(2)`)
+
+        </script>
+
+    </body>
+</html>

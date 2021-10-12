@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Data Visualization</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+    </head>
+    <body>
+        <svg width = "1440" height = "600" id = "mainSvg" class = "svgs"></svg>
+        <script>
+            const data = [
+                {name: "Element1", value: 20},
+                {name: "Element2", value: 40},
+                {name: "Element3", value: 35},
+                {name: "Element4", value: 5},
+                {name: "Element5", value: 15},
+                {name: "Element6", value: 10},
+                {name: "Element7", value: 20},
+                {name: "Element8", value: 30},
+                {name: "Element9", value: 25},
+            ]
+
+            const mainSvg = d3.select("#mainSvg")
+            const mainWidth = +mainSvg.attr("width")
+            const mainHeight = +mainSvg.attr("height")
+
+            const margin = {top:60, right:120, bottom:30, left:120}
+            const innerWidth = mainWidth - margin.left - margin.right
+            const innerHeight = mainHeight - margin.bottom - margin.top
+
+            const g = mainSvg.append("g")
+                .attr("id", "mainGroup")
+                .attr("width", innerWidth)
+                .attr("height", innerHeight)
+                .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value)])
+                .range([0, innerWidth])
+
+            const yScale = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([0, innerHeight])
+                .padding(0.1)
+
+            const xAxis = d3.axisBottom(xScale)
+            g.append("g").call(xAxis)
+                .attr("transform", `translate(0, ${innerHeight})`)
+
+
+            const yAxis = d3.axisLeft(yScale)
+            g.append("g").call(yAxis)
+            
+            data.forEach( d => 
+            {
+                g.append("rect")
+                    .attr("width", xScale(d.value))
+                    .attr("height", yScale.bandwidth())
+                    .attr("y", yScale(d.name))
+                    .attr("fill", "orange")
+                    .attr("stroke", "purple")
+
+
+            }
+            )
+
+            //查找坐标轴的文字并修改字体
+            d3.selectAll(".tick text").attr("font-size", 20)
+
+            g.append("text")
+                .text("Title of the histogram")
+                .attr("font-size", 30)
+                .attr("text-anchor", "middle")
+                .attr("transform", `translate(${innerWidth/2},0)`)
+
+            
+        </script>
+    </body>
+</html>

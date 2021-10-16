@@ -1,197 +1,204 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Data Visualization</title>
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-    </head>
-    <body>
-       
-        <svg width = "1600" height = "900" id = "mainSvg" class = "svgs"></svg>
-        <script>
-            const mainSvg = d3.select('.svgs');
 
-            let dates;
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
 
-            let currentDate;
-            const dateDuration = 500;
+<body>
 
-            const xValue = d => Math.log(d["新增确诊"]+1);
-            const yValue = d => Math.log(d["确诊人数"]+1);
-            const rValue = d => { return Math.sqrt(d['感染率'] * 500) * 0.8 };
+    <svg width="1600" height="900" id="mainSvg" class="svgs"></svg>
+    <script>
+        const mainSvg = d3.select('.svgs');
 
-            const xAxisLabelText = '累计确诊人数（对数）';
-            const yAxisLabelText = '新增人数（对数）';
+        let dates;
 
-            const color = {
-                "武汉":"#ff1c12",
-                "黄石": "#de5991",
-                "十堰": "#759AA0",
-                "荆州": "#E69D87",
-                "宜昌": "#be3259",
-                "襄阳": "#EA7E53",
-                "鄂州": "#EEDD78",
-                "荆门": "#9359b1",
-                "孝感": "#47c0d4",
-                "黄冈": "#F49F42",
-                "咸宁": "#AA312C",
-                "恩施州": "#B35E45",
-                "随州": "#4B8E6F",
-                "仙桃": "#ff8603",
-                "天门": "#ffde1d",
-                "潜江": "#1e9d95",
-                "神农架": "#7289AB"
-            }
-            
-            d3.csv('./Resources/Data/hubeinxt.csv').then( data =>{
+        let currentDate;
+        const dateDuration = 500;
 
-                data = data.filter(d => d["地区"]!="总计");
+        const xValue = d => Math.log(d["新增确诊"] + 1);
+        const yValue = d => Math.log(d["确诊人数"] + 1);
+        const rValue = d => {
+            return Math.sqrt(d['感染率'] * 500) * 0.8
+        };
 
-                //将字符串转为int
-                //预处理数据
-                data.forEach(element => {
-                    element["确诊人数"] = +(element["确诊人数"]);
-                    element["新增确诊"] = +(element["新增确诊"]);
-                    if(element["新增确诊"]<0)
-                        element["新增确诊"]=0;
-                    
-                });
+        const xAxisLabelText = '累计确诊人数（对数）';
+        const yAxisLabelText = '新增人数（对数）';
 
-                
-                //Set中元素不重复，用以获得日期列表
-                var map = data.map(d => d["日期"]);
-                var set = new Set(map);
-                dates = Array.from(set);
+        const color = {
+            "武汉": "#ff1c12",
+            "黄石": "#de5991",
+            "十堰": "#759AA0",
+            "荆州": "#E69D87",
+            "宜昌": "#be3259",
+            "襄阳": "#EA7E53",
+            "鄂州": "#EEDD78",
+            "荆门": "#9359b1",
+            "孝感": "#47c0d4",
+            "黄冈": "#F49F42",
+            "咸宁": "#AA312C",
+            "恩施州": "#B35E45",
+            "随州": "#4B8E6F",
+            "仙桃": "#ff8603",
+            "天门": "#ffde1d",
+            "潜江": "#1e9d95",
+            "神农架": "#7289AB"
+        }
 
-                //日期排序
-                dates.sort((a,b) => {
-                    return new Date(a)- new Date(b);
-                });
+        d3.csv('./Resources/Data/hubeinxt.csv').then(data => {
 
-                //按日期把数据归类
-                //给日期安排数组空间
-                var seqList = [];                              //应当是二维数组
-                dates.forEach(date =>{
-                    seqList.push([]);
-                });
+            data = data.filter(d => d["地区"] != "总计");
 
-                //把各个日期数据放入空间
-                data.forEach(d =>{
-                    seqList[dates.indexOf(d["日期"])].push(d);
-                });
-
-                //console.log(seqList);
-
-
-                //建立图表，改变尺寸等
-                const mainSvg = d3.select("#mainSvg");
-                const mainWidth = +mainSvg.attr("width");
-                const mainHeight = +mainSvg.attr("height");
-
-                const margin = {top:60, right:120, bottom:120, left:120};
-                const innerWidth = mainWidth - margin.left - margin.right;
-                const innerHeight = mainHeight - margin.bottom - margin.top;
-
-                const g = mainSvg.append("g")
-                    .attr("id", "mainGroup")
-                    .attr("width", innerWidth)
-                    .attr("height", innerHeight)
-                    .attr("transform", `translate(${margin.left}, ${margin.top})`)
-
-                //定义比例尺
-                const xScale = d3.scaleLinear()
-                    //.domain(d3.extent(data, d => d["新增确诊"]))              //将取值方法封装
-                    .domain(d3.extent(data, xValue))
-                    .range([0, innerWidth])
-                    .nice();
-
-                const yScale = d3.scaleLinear()
-                    //.domain([0, d3.max(data, d => d["确诊人数"])])
-                    .domain(d3.extent(data, yValue).reverse())
-                    .range([0, innerHeight])
-                    .nice();
-
-                const rScale = d3.scaleLinear()
-                    .domain(d3.extent(data, xValue))
-                    .range([5, 30])
-                    .nice();
-
-                //添加坐标轴
-                const xAxis = d3.axisBottom(xScale);
-                const yAxis = d3.axisLeft(yScale);
-                
-                const xAxisGroup = g.append("g").call(xAxis)
-                    .attr("transform", `translate(0, ${innerHeight})`)
-                    //.tickSize(-innerHeight);
-                const yAxisGroup = g.append("g").call(yAxis)
-                    //.tickSize(-innerWidth);
-
-                //坐标轴标题
-                xAxisGroup.append('text')
-                    .attr('font-size', '2em')
-                    .attr('y', 60)
-                    .attr('x', innerWidth / 2)
-                    .attr('fill', '#333333')
-                    .text(xAxisLabelText);
-                
-                yAxisGroup.append('text')
-                    .attr('font-size', '2em')
-                    .attr('transform', `rotate(-90)`)
-                    .attr('x', -innerHeight / 2)
-                    .attr('y', -60)
-                    .attr('fill', '#333333')
-                    .text(yAxisLabelText)
-                    .attr('text-anchor', 'middle');
-                    
-
-                //查找坐标轴的文字并修改字体
-                g.selectAll(".tick text").attr("font-size", 20);
-
-                //添加图表标题
-                g.append("text")
-                    .text("武汉疫情统计散点图")
-                    .attr("font-size", 30)
-                    .attr("text-anchor", "middle")
-                    .attr("transform", `translate(${innerWidth/2},0)`);
-
-                //定时更新数据
-                currentDate = 0;
-                let interval = setInterval(() => {
-                    if(currentDate >= dates.length){
-                        clearInterval(currentDate);
-                    }else{
-                        console.log(currentDate);
-                        updateScatter(seqList[currentDate]);
-                        currentDate++;
-                    }
-                }, dateDuration);
-
-
-                function updateScatter(seq){
-
-                    const g = d3.select("#mainGroup");
-                    
-                    
-                    let circleUpdate = g.selectAll(".dataCircle").data(seq, d=> d["地区"]);
-
-                    
-                    let circleEnter = circleUpdate.enter().append("circle")
-                        .attr("cx", d => xScale(xValue(d)))
-                        .attr("cy", d => yScale(yValue(d)))
-                        .attr("class","dataCircle")
-                        .attr("fill", d => color[d["地区"]])
-                        .attr("stroke", "red");
-
-
-                    circleUpdate.merge(circleEnter)
-                        .transition().ease(d3.easeLinear).duration(dateDuration)
-                        .attr("cx", d => xScale(xValue(d)))
-                        .attr("cy", d => yScale(yValue(d)))
-                        .attr("r", d => rScale(xValue(d)));
-                }
-
+            //将字符串转为int
+            //预处理数据
+            data.forEach(element => {
+                element["确诊人数"] = +(element["确诊人数"]);
+                element["新增确诊"] = +(element["新增确诊"]);
+                if (element["新增确诊"] < 0)
+                    element["新增确诊"] = 0;
 
             });
-            
-        </script>
-    </body>
+
+
+            //Set中元素不重复，用以获得日期列表
+            var map = data.map(d => d["日期"]);
+            var set = new Set(map);
+            dates = Array.from(set);
+
+            //日期排序
+            dates.sort((a, b) => {
+                return new Date(a) - new Date(b);
+            });
+
+            //按日期把数据归类
+            //给日期安排数组空间
+            var seqList = []; //应当是二维数组
+            dates.forEach(date => {
+                seqList.push([]);
+            });
+
+            //把各个日期数据放入空间
+            data.forEach(d => {
+                seqList[dates.indexOf(d["日期"])].push(d);
+            });
+
+            //console.log(seqList);
+
+
+            //建立图表，改变尺寸等
+            const mainSvg = d3.select("#mainSvg");
+            const mainWidth = +mainSvg.attr("width");
+            const mainHeight = +mainSvg.attr("height");
+
+            const margin = {
+                top: 60,
+                right: 120,
+                bottom: 120,
+                left: 120
+            };
+            const innerWidth = mainWidth - margin.left - margin.right;
+            const innerHeight = mainHeight - margin.bottom - margin.top;
+
+            const g = mainSvg.append("g")
+                .attr("id", "mainGroup")
+                .attr("width", innerWidth)
+                .attr("height", innerHeight)
+                .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+            //定义比例尺
+            const xScale = d3.scaleLinear()
+                //.domain(d3.extent(data, d => d["新增确诊"]))              //将取值方法封装
+                .domain(d3.extent(data, xValue))
+                .range([0, innerWidth])
+                .nice();
+
+            const yScale = d3.scaleLinear()
+                //.domain([0, d3.max(data, d => d["确诊人数"])])
+                .domain(d3.extent(data, yValue).reverse())
+                .range([0, innerHeight])
+                .nice();
+
+            const rScale = d3.scaleLinear()
+                .domain(d3.extent(data, xValue))
+                .range([5, 30])
+                .nice();
+
+            //添加坐标轴
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            const xAxisGroup = g.append("g").call(xAxis)
+                .attr("transform", `translate(0, ${innerHeight})`)
+            //.tickSize(-innerHeight);
+            const yAxisGroup = g.append("g").call(yAxis)
+            //.tickSize(-innerWidth);
+
+            //坐标轴标题
+            xAxisGroup.append('text')
+                .attr('font-size', '2em')
+                .attr('y', 60)
+                .attr('x', innerWidth / 2)
+                .attr('fill', '#333333')
+                .text(xAxisLabelText);
+
+            yAxisGroup.append('text')
+                .attr('font-size', '2em')
+                .attr('transform', `rotate(-90)`)
+                .attr('x', -innerHeight / 2)
+                .attr('y', -60)
+                .attr('fill', '#333333')
+                .text(yAxisLabelText)
+                .attr('text-anchor', 'middle');
+
+
+            //查找坐标轴的文字并修改字体
+            g.selectAll(".tick text").attr("font-size", 20);
+
+            //添加图表标题
+            g.append("text")
+                .text("武汉疫情统计散点图")
+                .attr("font-size", 30)
+                .attr("text-anchor", "middle")
+                .attr("transform", `translate(${innerWidth/2},0)`);
+
+            //定时更新数据
+            currentDate = 0;
+            let interval = setInterval(() => {
+                if (currentDate >= dates.length) {
+                    clearInterval(currentDate);
+                } else {
+                    console.log(currentDate);
+                    updateScatter(seqList[currentDate]);
+                    currentDate++;
+                }
+            }, dateDuration);
+
+
+            function updateScatter(seq) {
+
+                const g = d3.select("#mainGroup");
+
+                let circleUpdate = g.selectAll(".dataCircle").data(seq, d => d["地区"]);
+
+                let circleEnter = circleUpdate.enter().append("circle")
+                    .attr("cx", d => xScale(xValue(d)))
+                    .attr("cy", d => yScale(yValue(d)))
+                    .attr("class", "dataCircle")
+                    .attr("fill", d => color[d["地区"]])
+                    .attr("stroke", "red");
+
+
+                circleUpdate.merge(circleEnter)
+                    .transition().ease(d3.easeLinear).duration(dateDuration)
+                    .attr("cx", d => xScale(xValue(d)))
+                    .attr("cy", d => yScale(yValue(d)))
+                    .attr("r", d => rScale(xValue(d)));
+            }
+
+
+        });
+    </script>
+</body>
+
 </html>

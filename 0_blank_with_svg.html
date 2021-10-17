@@ -8,9 +8,27 @@
 
 <body>
 
-    <svg width="960" height="960" id="mainSvg" class="svgs"></svg>
+    <svg width="1600" height="960" id="mainSvg" class="svgs"></svg>
     <script>
-        let mainSvg = d3.select('.svgs')
+        
+        const mainSvg = d3.select('.svgs')
+        const mainWidth = +mainSvg.attr("width");
+        const mainHeight = +mainSvg.attr("height");
+        const margin = {
+            top: 60,
+            right: 120,
+            bottom: 120,
+            left: 60
+        };
+        const innerWidth = mainWidth - margin.left - margin.right;
+        const innerHeight = mainHeight - margin.bottom - margin.top;
+
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", innerWidth)
+            .attr("height", innerHeight)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
     </script>
 </body>
 

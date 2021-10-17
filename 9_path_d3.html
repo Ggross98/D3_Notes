@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <svg width="1600" height="960" id="mainSvg" class="svgs"></svg>
+    <script>
+        let mainSvg = d3.select('.svgs')
+        const mainWidth = +mainSvg.attr("width");
+        const mainHeight = +mainSvg.attr("height");
+        const margin = {
+            top: 60,
+            right: 120,
+            bottom: 120,
+            left: 60
+        };
+        const innerWidth = mainWidth - margin.left - margin.right;
+        const innerHeight = mainHeight - margin.bottom - margin.top;
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", innerWidth)
+            .attr("height", innerHeight)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`)
+        const path = g.append("path")
+            
+        const pathUpdateInterval = 2000, pathUpdateDuration = 1500;
+
+        var xScale, yScale;
+        var xAxisGroup, yAxisGroup;
+        const xValue = d => new Date(d["日期"]);
+        const yValue = d => d["现有确诊"];
+        var dates, provinces;
+
+        function initAxis(data){
+            xScale = d3.scaleTime()
+                .domain(d3.extent(dates, d => new Date(d)))
+                .range([0, innerWidth])
+                .nice();
+            var xAxis = d3.axisBottom(xScale)
+                .ticks(Math.floor(dates.length) / 4)
+                .tickSize(-innerHeight);
+
+            yScale = d3.scaleLinear()
+                .domain(d3.extent(data, yValue).reverse())
+                .range([0,innerHeight])
+                .nice();
+            var yAxis = d3.axisLeft(yScale)
+                .tickSize(-innerWidth);
+
+            xAxisGroup = g.append("g").call(xAxis)
+                .attr("transform", `translate(0, ${innerHeight})`);
+            yAxisGroup = g.append("g").call(yAxis);
+        }
+
+        function updatePath(data){
+
+            var line = d3.line()
+                .x( d => xScale(xValue(d)))
+                .y( d => yScale(yValue(d)))
+                .curve(d3.curveCardinal.tension(0.5))
+
+            path.datum(data)
+                .attr("stroke", "red")
+                .attr("stroke-width", 3)
+                .attr("fill", "none")
+                .transition().duration( pathUpdateDuration )
+                .attr("d", line);
+
+        }
+
+        d3.csv("./Resources/Data/epidemic_china.csv").then(data =>{
+
+            data = data.filter(d => d["省份"]!="总计");
+            data = data.filter(d => d["省份"]!="湖北");
+            //console.log(data);
+
+            //获取日期
+            dates = Array.from(new Set(data.map(d => d["日期"])));
+
+            //console.log(dates);
+            data.forEach(e => {
+                e["现有确诊"] = +(e["现有确诊"]);
+                e["日期"] = new Date(e["日期"]);
+            });
+
+            //获得省份列表
+            provinces = Array.from(new Set(data.map(d => d["省份"])));
+            console.log(provinces);
+
+            //按省份将数据分配
+            var sortedData = []; //应当是二维数组
+            provinces.forEach(_ => {
+                sortedData.push([]);
+            });
+            data.forEach(d => {
+                sortedData[provinces.indexOf(d["省份"])].push(d);
+            });
+
+            //初始化表格
+            initAxis(data);
+
+            let c = 0;
+            let intervalId = setInterval(() => {
+              if(c >= provinces.length){
+                  clearInterval(intervalId);
+              }else{
+                  updatePath(sortedData[c]);
+                  c = c + 1;
+              }
+            }, pathUpdateInterval);
+
+
+
+
+
+
+
+        });
+
+
+    </script>
+</body>
+
+</html>

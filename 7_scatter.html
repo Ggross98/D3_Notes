@@ -46,7 +46,7 @@
             "神农架": "#7289AB"
         }
 
-        d3.csv('./Resources/Data/hubeinxt.csv').then(data => {
+        d3.csv('./Resources/Data/epidemic_hubei.csv').then(data => {
 
             data = data.filter(d => d["地区"] != "总计");
 
@@ -157,7 +157,7 @@
 
             //添加图表标题
             g.append("text")
-                .text("武汉疫情统计散点图")
+                .text("湖北疫情统计气泡图")
                 .attr("font-size", 30)
                 .attr("text-anchor", "middle")
                 .attr("transform", `translate(${innerWidth/2},0)`);

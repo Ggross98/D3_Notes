@@ -3,12 +3,12 @@
 
 <head>
     <title>Data Visualization</title>
-    <link rel = "stylesheet" href = "./Resources/css/earth.css">
-    <link rel = "stylesheet" href = "./Resources/css/d3tip.css">
-    
-    <script src="./Resources/js/d3.min.js"></script>
-    <script src="./Resources/js/d3-tip.js"></script>
-    <script src="./Resources/js/topojson.js"></script>
+    <link rel="stylesheet" href="./resources/css/earth.css">
+    <link rel="stylesheet" href="./resources/css/d3tip.css">
+
+    <script src="./resources/js/d3.min.js"></script>
+    <script src="./resources/js/d3-tip.js"></script>
+    <script src="./resources/js/topojson.js"></script>
 </head>
 
 <body>
@@ -21,9 +21,9 @@
         const mainHeight = +mainSvg.attr("height");
         const margin = {
             top: 60,
-            right: (maxWidth - mainWidth)/2,
+            right: (maxWidth - mainWidth) / 2,
             bottom: 120,
-            left: (maxWidth - mainWidth)/2
+            left: (maxWidth - mainWidth) / 2
         };
         const innerWidth = mainWidth - margin.left - margin.right;
         const innerHeight = mainHeight - margin.bottom - margin.top;
@@ -33,7 +33,7 @@
             .attr("width", innerWidth)
             .attr("height", innerHeight)
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
-        
+
         //const path = g.append("path");
 
         const pro = d3.geoNaturalEarth1();
@@ -45,8 +45,8 @@
             .html(d => d.properties.name);
         g.call(tip);
 
-        d3.json("./Resources/Data/world_map.json").then(data =>{
-            
+        d3.json("./resources/data/world_map.json").then(data => {
+
             var meta = topojson.feature(data, data.objects.countries);
             console.log(meta);
 
@@ -56,28 +56,27 @@
                 .attr("d", geo)
                 //.attr("stroke", "navy")
                 .attr("stroke-width", 2)
-                .attr("opacity", 1)
+                .attr("fill-opacity", 1)
                 //.attr("fill", "blue")
-                .on("mouseover", function(d){
+                .on("mouseover", function (d) {
                     d3.select(this)
                         //.attr("fill", "SteelBlue")
                         //.attr("stroke", "black")
                         .attr("stroke-width", 5)
-                        .attr("opacity", 0.2);
+                        .attr("fill-opacity", 0.2);
                     tip.show(d);
                 })
-                .on("mouseout", function(d){
+                .on("mouseout", function (d) {
                     d3.select(this)
                         //.attr("stroke", "navy")
                         .attr("stroke-width", 2)
-                        .attr("opacity", 1);
-                        //.attr("fill", "blue");
+                        .attr("fill-opacity", 1);
+                    //.attr("fill", "blue");
                     tip.hide();
                 });
 
 
         });
-
     </script>
 </body>
 

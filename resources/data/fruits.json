@@ -1,0 +1,6 @@
+[
+    {"year": 2020, "month":1, "apple": 1000, "banana":500, "orange":800, "cherry":200, "grapes" : 600},
+    {"year": 2020, "month":2, "apple": 1200, "banana":800, "orange":600, "cherry":500, "grapes" : 400},
+    {"year": 2020, "month":3, "apple": 1600, "banana":1000, "orange":600, "cherry":500, "grapes" : 800},
+    {"year": 2020, "month":4, "apple": 1800, "banana":800, "orange":400, "cherry":300, "grapes" : 1000}
+]

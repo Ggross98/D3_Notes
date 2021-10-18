@@ -46,7 +46,7 @@
             "神农架": "#7289AB"
         }
 
-        d3.csv('./Resources/Data/epidemic_hubei.csv').then(data => {
+        d3.csv('./resources/data/epidemic_hubei.csv').then(data => {
 
             data = data.filter(d => d["地区"] != "总计");
 

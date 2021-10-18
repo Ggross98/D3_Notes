@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <svg width="1600" height="960" id="mainSvg" class="svgs"></svg>
+    <script>
+        
+        const mainSvg = d3.select('.svgs')
+        const mainWidth = +mainSvg.attr("width");
+        const mainHeight = +mainSvg.attr("height");
+        const margin = {
+            top: 60,
+            right: 120,
+            bottom: 120,
+            left: 60
+        };
+        const innerWidth = mainWidth - margin.left - margin.right;
+        const innerHeight = mainHeight - margin.bottom - margin.top;
+
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", innerWidth)
+            .attr("height", innerHeight)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        const fruitKeys = ["apple", "banana", "orange", "cherry", "grapes"];
+        const color = d3.scaleOrdinal()
+            .domain(fruitKeys)
+            .range(d3.schemeSet2);
+
+        var xScale, yScale;
+
+        const xValue = function(d){
+            return d.year+"年"+d.month+"月";
+            //return d.month;
+        }
+
+        const fruitStack = d3.stack()
+            .keys(fruitKeys)
+            .order(d3.stackOrderNone);
+
+        var xAxisGroup, yAxisGroup;
+
+        const initAxis = function(stack, data){
+            yScale = d3.scaleLinear()
+                .domain([0, d3.max(stack, d=>d3.max(d, dd => dd[1]))])
+                .range([innerHeight, 0]);
+            xScale = d3.scaleBand()
+                .domain(data.map(d => xValue(d)))
+                .range([0, innerWidth])
+                .padding(0.5);
+
+            var xAxis = d3.axisBottom(xScale)
+                //.ticks(Math.floor(dates.length) / 4)
+                .tickSize(-innerHeight);
+
+            var yAxis = d3.axisLeft(yScale)
+                .tickSize(-innerWidth);
+
+            xAxisGroup = g.append("g").call(xAxis)
+                .attr("transform", `translate(0, ${innerHeight})`);
+            yAxisGroup = g.append("g").call(yAxis);
+        }
+
+        d3.json("./resources/data/fruits.json").then(data => {
+
+            var stack = fruitStack(data);
+                
+            console.log(stack);
+
+            initAxis(stack, data);
+
+            g.selectAll(".stack")
+                .data(stack)
+                .join("g")
+                .attr("class", "stack")
+                .attr("fill", d=>color(d.key))
+            .selectAll(".stackRect")
+                .data(d => d)
+                .join("rect")
+                .attr("class", "stackRect")
+                .attr("x", d=>xScale(xValue(d.data)))
+                .attr("y", d=>yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d=> yScale(d[0]) - yScale(d[1]));
+
+
+            
+
+            
+                
+
+        });
+
+        
+
+    </script>
+</body>
+
+</html>

@@ -73,7 +73,7 @@
 
         }
 
-        d3.csv("./resources/data/epidemic_china.csv").then(data =>{
+        d3.csv("./resources/data/9_epidemic_china.csv").then(data =>{
 
             data = data.filter(d => d["省份"]!="总计");
             data = data.filter(d => d["省份"]!="湖北");

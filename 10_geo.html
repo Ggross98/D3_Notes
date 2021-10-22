@@ -45,7 +45,7 @@
             .html(d => d.properties.name);
         g.call(tip);
 
-        d3.json("./resources/data/world_map.json").then(data => {
+        d3.json("./resources/data/10_world_map.json").then(data => {
 
             var meta = topojson.feature(data, data.objects.countries);
             console.log(meta);

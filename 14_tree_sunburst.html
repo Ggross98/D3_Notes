@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <svg width="1600" height="800" id="mainSvg" class="svgs"></svg>
+    <script>
+        const mainSvg = d3.select('.svgs')
+        const width = +mainSvg.attr("width");
+        const height = +mainSvg.attr("height");
+
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("transform", `translate(${width/2}, ${height/2})`);
+
+        var root;
+
+        d3.json("./resources/data/12_games.json").then(data => {
+
+            var rootPartition = d3.partition().size([2 * Math.PI, height / 1.6]);
+            root = rootPartition(
+                d3.hierarchy(data).sum(d => d.popularity)
+                .sort((a, b) => b.popularity - a.popularity)
+            );
+
+            console.log(root);
+
+            //去除掉根节点
+            var descendants = root.descendants().filter(d => d.depth != 0);
+
+            renderPath(descendants);
+            renderText(descendants);
+
+        });
+
+        const color = d3.scaleOrdinal()
+            .range(d3.schemeCategory10);
+
+
+        const fill = function (d) {
+            if (d.depth <= 1) {
+                return color(d.data.name);
+            } else {
+                return fill(d.parent);
+            }
+        }
+
+        const arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .innerRadius(d => d.y0)
+            .outerRadius(d => d.y1);
+
+        const renderPath = function (rootDescendants) {
+
+            g.selectAll(".dataPath").data(rootDescendants).join("path")
+                .attr("class", "dataPath")
+                .attr("fill", d => fill(d))
+                .attr("d", arc);
+
+        }
+
+        const renderText = function (rootDescendants) {
+            g.selectAll(".dataText").data(rootDescendants).join("text")
+                .attr("class", "dataText")
+                .attr("text-anchor", "middle")
+                .attr("transform", d => {
+                    var x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+                    var y = (d.y0 + d.y1) / 2;
+                    return `rotate(${x-90}) translate(${0,y}) rotate(${x<180 ?0 :180})`;
+                })
+                .text(d => d.data.name);
+        }
+    </script>
+</body>
+
+</html>

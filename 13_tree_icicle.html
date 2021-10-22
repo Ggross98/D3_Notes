@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <svg width="1600" height="2800" id="mainSvg" class="svgs"></svg>
+    <script>
+        const mainSvg = d3.select('.svgs')
+        const mainWidth = +mainSvg.attr("width");
+        const mainHeight = +mainSvg.attr("height");
+        const margin = {
+            top: 60,
+            right: 120,
+            bottom: 120,
+            left: 60
+        };
+        const innerWidth = mainWidth - margin.left - margin.right;
+        const innerHeight = mainHeight - margin.bottom - margin.top;
+
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", innerWidth)
+            .attr("height", innerHeight)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        var root;
+
+        d3.json("./resources/data/12_games.json").then(data => {
+
+            var rootPartition = d3.partition().size([innerHeight, innerWidth]);
+            root = rootPartition(
+                d3.hierarchy(data).sum(d=>d.popularity)
+                    .sort((a,b)=> b.popularity - a.popularity)
+            );
+
+            console.log(root);
+
+            renderRect(root.descendants());
+            renderText(root.descendants());
+
+        });
+
+        const color = d3.scaleOrdinal()
+            .range(d3.schemeCategory10);
+
+
+        const fill = function (d) {
+            if (d.depth <= 1) {
+                return color(d.data.name);
+            } else {
+                return fill(d.parent);
+            }
+        }
+
+        const renderRect = function(rootDescendants){
+            g.selectAll(".dataRect").data(rootDescendants).join("rect")
+                .attr("class", "dataRect")
+                .attr("fill", d=>fill(d))
+                .attr("x", d=>d.y0).attr("y", d=>d.x0)
+                .attr("width", d=> d.y1-d.y0)
+                .attr("height", d=>d.x1 - d.x0);
+
+        }
+
+        const renderText = function(rootDescendants){
+            g.selectAll(".dataText").data(rootDescendants).join("text")
+                .attr("class", "dataText")
+                .attr("text-anchor", "middle")
+                .attr("x", d=>(d.y0+d.y1)/2).attr("y", d=>(d.x0+d.x1)/2)
+                .text(d=>d.data.name);
+        }
+
+        
+    </script>
+</body>
+
+</html>

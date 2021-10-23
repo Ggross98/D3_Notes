@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Data Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <svg width="1600" height="960" id="mainSvg" class="svgs"></svg>
+    <script>
+        
+        const mainSvg = d3.select('.svgs')
+        const mainWidth = +mainSvg.attr("width");
+        const mainHeight = +mainSvg.attr("height");
+        const margin = {
+            top: 60,
+            right: 120,
+            bottom: 120,
+            left: 60
+        };
+        const innerWidth = mainWidth - margin.left - margin.right;
+        const innerHeight = mainHeight - margin.bottom - margin.top;
+
+        const g = mainSvg.append("g")
+            .attr("id", "mainGroup")
+            .attr("width", innerWidth)
+            .attr("height", innerHeight)
+            .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        var lines, circles;
+
+        d3.json("./resources/data/15_force.json").then(data =>{
+
+            var links = data.links;
+
+            var nodes = [];
+            for(var i = 0;i<data["#nodes"];i++){
+                nodes.push({"index": i});
+            }
+            console.log(nodes);
+
+            
+            init(links, nodes);
+
+            
+            var simulation = d3.forceSimulation(nodes)
+                .force("manybody", d3.forceManyBody().strength(-30))
+                .force("center", d3.forceCenter(innerWidth/2, innerHeight/2))
+                .force("link", d3.forceLink(links).strength(0.1).distance(100))
+                .on("tick", update);
+            
+
+        });
+
+        const init = function(links, nodes){
+            lines = g.selectAll("line").data(links).join("line")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1);
+            
+            circles = g.selectAll("circle").data(nodes).join("circle")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("r", 3)
+                .attr("fill", "black");
+        }
+
+        const update = function(){
+            lines  
+                .attr("x1", d=>d.source.x)
+                .attr("y1", d=>d.source.y)
+                .attr("x2", d=>d.target.x)
+                .attr("y2", d=>d.target.y);
+            
+            circles
+                .attr("cx", d=>d.x)
+                .attr("cy", d=>d.y);
+        }
+
+    </script>
+</body>
+
+</html>
